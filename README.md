@@ -11,6 +11,7 @@ This repository documents the architectural journey and final neural network des
 Check out the trained agent in action!
 
 ![Gameplay Demo](screenrecordings/gameplay.gif)
+![Dodge](screenrecordings/moment.gif)
 
 ---
 
