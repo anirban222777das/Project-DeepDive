@@ -1,54 +1,43 @@
-# Seaquest RL Agent
+# Seaquest RL Agent: Memory Solves the Oxygen Bottleneck
 
-This repository contains a Reinforcement Learning agent built to play the classic Atari 2600 game **Seaquest** from raw pixel observations. 
+This repository contains an advanced Reinforcement Learning agent built to play the classic Atari 2600 game **Seaquest** from raw pixel observations. 
 
-The agent is trained using a Convolutional Neural Network (CNN) combined with the **Double Deep Q-Network (Double DQN)** algorithm. It interfaces with the Arcade Learning Environment (ALE) via Gymnasium.
+Through iterative development, the agent evolved from a simple Convolutional Neural Network (CNN) using Double DQN, to a sophisticated **Recurrent Double DQN (DRQN)** featuring Long Short-Term Memory (LSTM). It interfaces with the Arcade Learning Environment (ALE) via Gymnasium.
 
-## Architecture and Methods
-
-### Observation Processing
-The agent learns directly from raw visual input without any hand-engineered game state features.
-- **Grayscale Conversion & Resizing**: The raw RGB frames are converted to grayscale and downsampled to 84x84 pixels.
-- **Frame Stacking**: To provide the agent with a sense of motion and velocity, the last 4 frames are stacked together, creating an input volume of `(4, 84, 84)`.
-- **Normalization**: Pixel values (uint8) are scaled to `[0, 1]` inside the network for stability.
-
-### Neural Network (CNN)
-The Q-network follows the standard architecture introduced by DeepMind:
-- **Conv1**: 32 filters, 8x8 kernel, stride 4
-- **Conv2**: 64 filters, 4x4 kernel, stride 2
-- **Conv3**: 64 filters, 3x3 kernel, stride 1
-- **Fully Connected**: 512 units
-- **Output**: 18 linear units corresponding to the 18 possible Atari actions.
-
-### Double DQN & Experience Replay
-We utilize **Double DQN (DDQN)** to mitigate the systematic overestimation of Q-values common in vanilla DQN. Action selection is decoupled from action evaluation using a frozen target network.
-
-A **Replay Buffer** of capacity 1,000,000 stores recent transitions `(state, action, reward, next_state, done)`. Mini-batches are uniformly sampled from this buffer to break temporal correlations and stabilize the training gradients.
-
-## Training Progression & Results
-
-The project went through multiple iterations to reach a stable, capable model. 
+## The Evolution of the Agent
 
 ### 1. Untrained Baseline
-Initially, a completely random agent was evaluated to establish a baseline. Without training, the submarine moves erratically, fails to avoid enemies, and suffocates quickly. The average score is near **0-20 points**.
+Without training, a random agent acts erratically, failing to avoid enemies or manage oxygen. Average score: **0-20 points**.
 
-### 2. Vanilla DQN (The Issue)
-The first implementation used the standard Vanilla DQN algorithm trained for 300,000 steps. 
-**The Issue:** The agent demonstrated extreme Q-value overestimation. It would briefly learn to shoot enemies, but as the Q-values ballooned out of control, the policy destabilized and performance collapsed back to random levels. The agent couldn't play properly at all.
+### 2. Double DQN (The "Oxygen Bottleneck")
+We successfully trained a standard **Double DQN** (CNN-only) for 1,000,000 steps. 
+- **Achievements:** It learned to shoot enemies and dodge obstacles, averaging **300-350 points**.
+- **The Fatal Flaw:** The agent only "saw" a stack of the last 4 frames (a fraction of a second). To survive in Seaquest, you must collect a diver and then surface for oxygen. Because it had no long-term memory, it would collect a diver, fight sharks for 10 seconds, and completely forget it had a diver. It would try to surface for air and die instantly. It **never** survived the second oxygen cycle.
 
-### 3. Double DQN (The Fix)
-To solve the instability, the architecture was upgraded to **Double DQN (DDQN)**, which decouples action selection from action evaluation. This successfully flattened the Q-value overestimation. 
-Combined with an extended training time of **1,000,000 environment steps**, the agent finally learned to play the game effectively. 
+### 3. Recurrent Double DQN (The Solution)
+To make the agent smarter, we implemented a **Recurrent Double DQN (DRQN)**. By injecting an LSTM layer after the CNN, the agent gained an internal "hidden state" that persists over time. 
+- **The Result:** The agent successfully learned to remember when it collected a diver! During a rigorous 20-episode evaluation, it reached low oxygen 161 times, and successfully resurfaced 81 times. 
+- **Score:** Because it survived multiple oxygen cycles, its average score skyrocketed to **516 points**, with peaks hitting **900 points**.
 
-### Current Capabilities (1M-Step DDQN)
+![DRQN vs DDQN Reward Comparison](assets/drqn_vs_ddqn_reward.png)
 
-**Achievements:**
-- The agent quickly learns basic survival: it successfully avoids enemies (sharks and submarines) and learns to shoot them to accumulate score.
-- The average reward plateaus around **300-350 points**, significantly outperforming an untrained random agent.
+## Architecture Details
 
-**Limitations (The Oxygen Bottleneck):**
-Seaquest requires the player to manage oxygen. To refill oxygen, the submarine must surface—but surfacing without having collected at least one diver causes instant death. 
-Our rigorous evaluation shows that the current agent struggles with this long-horizon temporal credit assignment. It frequently learns to collect a diver and surface *once* per life, but fails to maintain the "collect diver -> surface" loop on the second oxygen cycle, consistently suffocating.
+### Observation Processing
+The agent learns directly from raw visual input:
+- **Grayscale Conversion & Resizing**: The raw RGB frames are converted to grayscale and downsampled to 84x84 pixels.
+- **Normalization**: Pixel values (uint8) are scaled to `[0, 1]`.
+
+### Neural Network (DRQN)
+The Recurrent Q-network is designed to process temporal sequences:
+1. **Conv1**: 32 filters, 8x8 kernel, stride 4
+2. **Conv2**: 64 filters, 4x4 kernel, stride 2
+3. **Conv3**: 64 filters, 3x3 kernel, stride 1
+4. **LSTM Layer**: 512-dimensional hidden state to maintain temporal memory across frames.
+5. **Output**: 18 linear units corresponding to the 18 possible Atari actions.
+
+### Sequence-Aware Replay Buffer
+To train the LSTM, the experience replay buffer was rewritten to sample valid **temporal sequences** (length 8) rather than isolated random frames, ensuring the LSTM learns how events unfold over time.
 
 ## Installation
 
@@ -61,51 +50,44 @@ pip install -r requirements.txt
 ```
 
 ### ROM Setup
-To comply with copyright laws, the Atari ROMs are **not distributed** in this repository. 
-You must legally obtain the Seaquest ROM and import it into ALE. Typically, this is done using the AutoROM utility (which downloads ROMs for academic research):
+To comply with copyright laws, the Atari ROMs are **not distributed** in this repository. You must legally obtain the Seaquest ROM via AutoROM:
 ```bash
 AutoROM --accept-license
 ```
 
 ## Usage
 
-### Training
-To train the Double DQN agent from scratch:
+### Training the DRQN Agent
+To train the memory-enabled agent from scratch (Warning: training LSTMs sequentially takes longer than standard CNNs. Expect 3-5 hours on an Apple Silicon M-series chip):
 ```bash
-python -m src.train \
-    --algorithm double-dqn \
+python -m src.train_recurrent \
     --steps 1000000 \
     --batch-size 32 \
-    --log-dir logs/training \
-    --checkpoint-dir models/checkpoints \
+    --log-dir logs/training_drqn \
+    --checkpoint-dir models/checkpoints_drqn \
     --device mps
 ```
-*(Note: Use `--device cuda` or `--device cpu` depending on your hardware. Apple Silicon MPS is fully supported.)*
+*(Note: Use `--device cuda` or `--device cpu` depending on your hardware.)*
 
-### Evaluation
-To evaluate a trained checkpoint:
+### Evaluating the Agent
+To evaluate the agent and specifically track its oxygen management behavior:
 ```bash
-python -m src.evaluate \
-    --checkpoint models/checkpoints/dqn_step_1000000.pt \
+python -m src.evaluate_recurrent \
+    --checkpoint models/checkpoints_drqn/drqn_step_1000000.pt \
     --episodes 20 \
     --track-oxygen
 ```
 
 ### Watching the Agent
-To visually render the agent playing the game:
+To visually render the smart agent playing the game:
 ```bash
-python -m src.watch_agent \
-    --checkpoint models/checkpoints/dqn_step_1000000.pt \
+python -m src.watch_recurrent_agent \
+    --checkpoint models/checkpoints_drqn/drqn_step_1000000.pt \
     --episodes 3
 ```
 
-### Testing
-Run the deterministic unit test suite:
+## Testing
+Run the deterministic unit test suite to verify the recurrent architecture and sequence buffers:
 ```bash
 PYTHONPATH=. pytest tests/
 ```
-
-## Future Work
-To solve the long-horizon oxygen management bottleneck, future extensions could include:
-- **Recurrent Memory (DRQN)**: Using LSTMs to allow the agent to remember if it has collected a diver outside of the 4-frame stack window.
-- **Prioritized Experience Replay**: To sample rare but critical events (like suffocating or successfully surfacing) more frequently.
