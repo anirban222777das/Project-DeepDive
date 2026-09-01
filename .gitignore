@@ -1,0 +1,50 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Game ROMs and Binaries
+*.bin
+*.rom
+*.a26
+*.gz
+
+# Model checkpoints
+models/checkpoints/
+*.pt
+*.pth
+
+# Logs and generated data
+logs/
+!logs/.gitkeep
+models/
+!models/.gitkeep
+
+# Pytest
+.pytest_cache/
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Antigravity/Gemini (though these usually live outside, just in case)
+.gemini/
