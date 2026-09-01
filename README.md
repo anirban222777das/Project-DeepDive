@@ -10,7 +10,7 @@ This repository documents the architectural journey and final neural network des
 
 Check out the trained agent in action!
 
-<video src="screenrecordings/gameplay.mov" autoplay="autoplay" loop="loop" muted="muted" controls="controls" style="max-height:640px;"></video>
+![Gameplay Demo](screenrecordings/gameplay.gif)
 
 ---
 
