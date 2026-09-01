@@ -25,9 +25,22 @@ We utilize **Double DQN (DDQN)** to mitigate the systematic overestimation of Q-
 
 A **Replay Buffer** of capacity 1,000,000 stores recent transitions `(state, action, reward, next_state, done)`. Mini-batches are uniformly sampled from this buffer to break temporal correlations and stabilize the training gradients.
 
-## Results and Current Capabilities
+## Training Progression & Results
 
-The agent was trained for **1,000,000 environment steps** using an epsilon-greedy exploration strategy. 
+The project went through multiple iterations to reach a stable, capable model. 
+
+### 1. Untrained Baseline
+Initially, a completely random agent was evaluated to establish a baseline. Without training, the submarine moves erratically, fails to avoid enemies, and suffocates quickly. The average score is near **0-20 points**.
+
+### 2. Vanilla DQN (The Issue)
+The first implementation used the standard Vanilla DQN algorithm trained for 300,000 steps. 
+**The Issue:** The agent demonstrated extreme Q-value overestimation. It would briefly learn to shoot enemies, but as the Q-values ballooned out of control, the policy destabilized and performance collapsed back to random levels. The agent couldn't play properly at all.
+
+### 3. Double DQN (The Fix)
+To solve the instability, the architecture was upgraded to **Double DQN (DDQN)**, which decouples action selection from action evaluation. This successfully flattened the Q-value overestimation. 
+Combined with an extended training time of **1,000,000 environment steps**, the agent finally learned to play the game effectively. 
+
+### Current Capabilities (1M-Step DDQN)
 
 **Achievements:**
 - The agent quickly learns basic survival: it successfully avoids enemies (sharks and submarines) and learns to shoot them to accumulate score.
