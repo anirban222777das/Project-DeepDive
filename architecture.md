@@ -11,6 +11,32 @@ Atari 2600 environments output raw RGB arrays at 210x160 resolution. Feeding thi
 ## 2. The Recurrent Neural Network (DRQN)
 The core "brain" of the agent (`src/recurrent_network.py`) is divided into three distinct phases: **Perception**, **Memory**, and **Decision**.
 
+```mermaid
+graph TD
+    A[Raw Atari RGB Frame<br/>210x160x3] -->|Grayscale & Resize| B(Preprocessed Frame<br/>84x84x1)
+    
+    subgraph CNN [Phase A: Perception CNN]
+        B -->|Conv1: 8x8, stride 4| C(Feature Map 1<br/>32x20x20)
+        C -->|Conv2: 4x4, stride 2| D(Feature Map 2<br/>64x9x9)
+        D -->|Conv3: 3x3, stride 1| E(Feature Map 3<br/>64x7x7)
+    end
+    
+    E -->|Flatten| F(1D Array<br/>3,136)
+    
+    subgraph LSTM [Phase B: LSTM Memory]
+        F --> G{LSTM Cell}
+        H[(Previous Hidden State<br/>Size: 512)] --> G
+        G --> I[(Current Hidden State<br/>Size: 512)]
+    end
+    
+    subgraph Action [Phase C: Decision Head]
+        I --> J[Fully Connected Layer]
+        J --> K[18 Q-Values]
+    end
+    
+    K -->|Argmax| L((Selected Joystick Action))
+```
+
 ### Phase A: Perception (The CNN)
 The agent "sees" the game using a Convolutional Neural Network (CNN) based on the original DeepMind architecture, but optimized to feed into a recurrent layer.
 - **Conv Layer 1:** 32 filters, 8x8 kernel, stride of 4. (Extracts broad shapes like the submarine and enemies).
