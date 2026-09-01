@@ -1,8 +1,16 @@
-# Seaquest RL Agent: Memory Solves the Oxygen Bottleneck
+# 🌊 Project DeepDive: Autonomous Atari Seaquest Agent
 
-This repository contains an advanced Reinforcement Learning agent built to play the classic Atari 2600 game **Seaquest** from raw pixel observations. 
+**Project DeepDive** is a deep reinforcement learning framework that trains an autonomous AI agent to master the classic 1983 Atari 2600 game, *Seaquest*, using only raw pixel inputs and in-game rewards. 
 
-Through iterative development, the agent evolved from a simple Convolutional Neural Network (CNN) using Double DQN, to a sophisticated **Recurrent Double DQN (DRQN)** featuring Long Short-Term Memory (LSTM). It interfaces with the Arcade Learning Environment (ALE) via Gymnasium.
+In Seaquest, players must pilot a submarine to shoot enemies, dodge obstacles, rescue divers, and most importantly, surface frequently to replenish a strictly limited oxygen supply. This multi-layered objective presents a notoriously difficult challenge for standard AI agents, known as the "Long-Horizon Temporal Credit Assignment" problem—specifically, the agent must remember to surface for oxygen long after rescuing a diver.
+
+This repository documents the architectural journey and final neural network design used to solve this exact problem.
+
+---
+
+## The Breakthrough: Memory Solves the Oxygen Bottleneck
+
+Through iterative development, the agent evolved from a standard Convolutional Neural Network (CNN) using Double DQN, to a sophisticated **Recurrent Double DQN (DRQN)** featuring Long Short-Term Memory (LSTM) to maintain an internal understanding of time. It interfaces with the Arcade Learning Environment (ALE) via Gymnasium.
 
 ## The Evolution of the Agent
 
