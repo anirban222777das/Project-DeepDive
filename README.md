@@ -39,26 +39,61 @@ The Recurrent Q-network is designed to process temporal sequences:
 ### Sequence-Aware Replay Buffer
 To train the LSTM, the experience replay buffer was rewritten to sample valid **temporal sequences** (length 8) rather than isolated random frames, ensuring the LSTM learns how events unfold over time.
 
-## Installation
+## Installation & Setup (For a Fresh Clone)
 
-We recommend using Conda to manage the environment:
+Follow these exact steps if you have just cloned the repository and want to run the pre-trained smart agent.
 
+### 1. Clone the Repository
+```bash
+git clone https://github.com/yourusername/seaquest-rl.git
+cd seaquest-rl
+```
+
+### 2. Set Up the Python Environment
+We highly recommend using Conda to keep dependencies isolated:
 ```bash
 conda create -n aimltrain python=3.10
 conda activate aimltrain
+```
+
+### 3. Install Dependencies
+Install PyTorch, Gymnasium, the Atari emulator (Arcade Learning Environment), and other requirements:
+```bash
 pip install -r requirements.txt
 ```
 
-### ROM Setup
-To comply with copyright laws, the Atari ROMs are **not distributed** in this repository. You must legally obtain the Seaquest ROM via AutoROM:
+### 4. Install the Atari ROMs (Emulator Setup)
+To comply with copyright law, the actual Atari game files (ROMs) are **not included** in this GitHub repository. You must legally download them using the `AutoROM` tool (which was installed in the previous step):
 ```bash
 AutoROM --accept-license
 ```
+*This command will automatically download the required Seaquest emulator files into your python environment.*
+
+---
 
 ## Usage
 
-### Training the DRQN Agent
-To train the memory-enabled agent from scratch (Warning: training LSTMs sequentially takes longer than standard CNNs. Expect 3-5 hours on an Apple Silicon M-series chip):
+### Watching the Pre-Trained Smart Agent
+You don't need to train the agent yourself! We have provided the fully trained, lightweight DRQN brain in the `models/` folder. 
+
+To watch the agent play the game with its LSTM memory active:
+```bash
+python -m src.watch_recurrent_agent \
+    --checkpoint models/drqn_final.pt \
+    --episodes 3
+```
+
+### Evaluating the Agent (No Rendering)
+To rigorously evaluate the agent's oxygen management metrics silently across 20 episodes:
+```bash
+python -m src.evaluate_recurrent \
+    --checkpoint models/drqn_final.pt \
+    --episodes 20 \
+    --track-oxygen
+```
+
+### Training from Scratch
+If you want to train the memory-enabled agent yourself from scratch (Warning: training LSTMs sequentially takes longer than standard CNNs. Expect 3-5 hours on an Apple Silicon M-series chip):
 ```bash
 python -m src.train_recurrent \
     --steps 1000000 \
@@ -67,24 +102,7 @@ python -m src.train_recurrent \
     --checkpoint-dir models/checkpoints_drqn \
     --device mps
 ```
-*(Note: Use `--device cuda` or `--device cpu` depending on your hardware.)*
-
-### Evaluating the Agent
-To evaluate the agent and specifically track its oxygen management behavior:
-```bash
-python -m src.evaluate_recurrent \
-    --checkpoint models/checkpoints_drqn/drqn_step_1000000.pt \
-    --episodes 20 \
-    --track-oxygen
-```
-
-### Watching the Agent
-To visually render the smart agent playing the game:
-```bash
-python -m src.watch_recurrent_agent \
-    --checkpoint models/checkpoints_drqn/drqn_step_1000000.pt \
-    --episodes 3
-```
+*(Note: Change `--device mps` to `--device cuda` for Nvidia GPUs or `--device cpu` if you do not have a dedicated GPU.)*
 
 ## Testing
 Run the deterministic unit test suite to verify the recurrent architecture and sequence buffers:
