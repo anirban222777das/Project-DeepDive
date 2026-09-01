@@ -6,7 +6,7 @@ class DQNAgent:
     """
     DQN Agent that wraps the CNN model to provide action selection functionality.
     Currently supports greedy, random, and epsilon-greedy action selection.
-    No learning or training mechanisms are implemented yet.
+    Evaluates states through the neural network to output the best action.
     """
     def __init__(self, action_count, model, device=None):
         self.action_count = action_count

@@ -8,7 +8,7 @@ class DQN:
     The Core Mathematical DQN Engine.
     Manages the Online Network (θ) and Target Network (θ⁻).
     Calculates the Bellman targets and current Q-values.
-    Now includes Phase 8: One-step Optimization Update.
+    Maintains online and target networks and computes Double DQN updates.
     """
     def __init__(self, action_count, device=None, gamma=0.99, learning_rate=1e-4, double_dqn=False):
         self.action_count = action_count
