@@ -18,34 +18,24 @@ Through iterative development, the agent evolved from a standard Convolutional N
 Without training, a random agent acts erratically, failing to avoid enemies or manage oxygen. Average score: **0-20 points**.
 
 ### 2. Double DQN (The "Oxygen Bottleneck")
-We successfully trained a standard **Double DQN** (CNN-only) for 1,000,000 steps. 
+I successfully trained a standard **Double DQN** (CNN-only) for 1,000,000 steps. 
 - **Achievements:** It learned to shoot enemies and dodge obstacles, averaging **300-350 points**.
 - **The Fatal Flaw:** The agent only "saw" a stack of the last 4 frames (a fraction of a second). To survive in Seaquest, you must collect a diver and then surface for oxygen. Because it had no long-term memory, it would collect a diver, fight sharks for 10 seconds, and completely forget it had a diver. It would try to surface for air and die instantly. It **never** survived the second oxygen cycle.
 
 ### 3. Recurrent Double DQN (The Solution)
-To make the agent smarter, we implemented a **Recurrent Double DQN (DRQN)**. By injecting an LSTM layer after the CNN, the agent gained an internal "hidden state" that persists over time. 
+To make the agent smarter, I implemented a **Recurrent Double DQN (DRQN)**. By injecting an LSTM layer after the CNN, the agent gained an internal "hidden state" that persists over time. 
 - **The Result:** The agent successfully learned to remember when it collected a diver! During a rigorous 20-episode evaluation, it reached low oxygen 161 times, and successfully resurfaced 81 times. 
 - **Score:** Because it survived multiple oxygen cycles, its average score skyrocketed to **516 points**, with peaks hitting **900 points**.
 
 ![DRQN vs DDQN Reward Comparison](assets/drqn_vs_ddqn_reward.png)
 
-## Architecture Details
+## 🧠 Architecture Details
 
-### Observation Processing
-The agent learns directly from raw visual input:
-- **Grayscale Conversion & Resizing**: The raw RGB frames are converted to grayscale and downsampled to 84x84 pixels.
-- **Normalization**: Pixel values (uint8) are scaled to `[0, 1]`.
+For a deep, technical breakdown of the Recurrent Neural Network architecture, the LSTM memory mechanisms, and the Double Q-Learning Bellman math, please refer to the full **[System Architecture Documentation](architecture.md)**.
 
-### Neural Network (DRQN)
-The Recurrent Q-network is designed to process temporal sequences:
-1. **Conv1**: 32 filters, 8x8 kernel, stride 4
-2. **Conv2**: 64 filters, 4x4 kernel, stride 2
-3. **Conv3**: 64 filters, 3x3 kernel, stride 1
-4. **LSTM Layer**: 512-dimensional hidden state to maintain temporal memory across frames.
-5. **Output**: 18 linear units corresponding to the 18 possible Atari actions.
+## ⚠️ Limitations & Known Issues
 
-### Sequence-Aware Replay Buffer
-To train the LSTM, the experience replay buffer was rewritten to sample valid **temporal sequences** (length 8) rather than isolated random frames, ensuring the LSTM learns how events unfold over time.
+Reinforcement Learning is an inherently volatile field. The agent suffers from catastrophic forgetting, hardware bottlenecks, and extreme visual fragility. For a highly detailed and realistic explanation of this model's limitations, please read the **[Limitations & Known Issues](limitations.md)** document.
 
 ## Installation & Setup (For a Fresh Clone)
 
@@ -58,7 +48,7 @@ cd seaquest-rl
 ```
 
 ### 2. Set Up the Python Environment
-We highly recommend using Conda to keep dependencies isolated:
+I highly recommend using Conda to keep dependencies isolated:
 ```bash
 conda create -n aimltrain python=3.10
 conda activate aimltrain
@@ -82,7 +72,7 @@ AutoROM --accept-license
 ## Usage
 
 ### Watching the Pre-Trained Smart Agent
-You don't need to train the agent yourself! We have provided the fully trained, lightweight DRQN brain in the `models/` folder. 
+You don't need to train the agent yourself! I have provided the fully trained, lightweight DRQN brain in the `models/` folder. 
 
 To watch the agent play the game with its LSTM memory active:
 ```bash
