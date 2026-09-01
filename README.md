@@ -6,6 +6,12 @@ In Seaquest, players must pilot a submarine to shoot enemies, dodge obstacles, r
 
 This repository documents the architectural journey and final neural network design used to solve this exact problem.
 
+## 🎮 Gameplay Demo
+
+Check out the trained agent in action!
+
+<video src="screenrecordings/gameplay.mov" autoplay="autoplay" loop="loop" muted="muted" controls="controls" style="max-height:640px;"></video>
+
 ---
 
 ## The Breakthrough: Memory Solves the Oxygen Bottleneck
